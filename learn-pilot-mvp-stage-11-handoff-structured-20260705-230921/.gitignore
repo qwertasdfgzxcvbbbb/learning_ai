@@ -1,0 +1,13 @@
+.next/
+node_modules/
+.tools/
+.npm-cache/
+tsconfig.tsbuildinfo
+coverage/
+playwright-report/
+test-results/
+.env
+.env.local
+.env.*.local
+*.log
+.git.local-backup/

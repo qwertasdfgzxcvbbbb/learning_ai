@@ -1,0 +1,407 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum PlanStatus {
+  draft
+  active
+  paused
+  completed
+  archived
+}
+
+enum GoalType {
+  quick_start
+  systematic
+  exam_prep
+  job_project
+  research
+  language
+  skill
+}
+
+enum FoundationLevel {
+  zero
+  beginner
+  intermediate
+  advanced
+}
+
+enum AssessmentStatus {
+  generated
+  completed
+  skipped
+}
+
+enum StageStatus {
+  planned
+  active
+  completed
+  adjusted
+}
+
+enum TaskStatus {
+  todo
+  in_progress
+  done
+  skipped
+  delayed
+}
+
+enum TaskType {
+  reading
+  watching
+  practice
+  output
+  test
+  review
+  resource_organization
+  project
+}
+
+enum TaskDifficulty {
+  easy
+  medium
+  challenging
+}
+
+enum ResourceType {
+  video_course
+  book
+  article
+  paper
+  case_study
+  official_doc
+  open_source
+  exercise
+  tool_guide
+  website
+}
+
+enum ResourceStatus {
+  want_to_learn
+  learned
+  unsuitable
+  invalid
+}
+
+enum ProgressLogType {
+  task_completed
+  task_delayed
+  task_skipped
+  manual_time
+  check_in
+}
+
+enum ReviewType {
+  weekly
+  stage
+}
+
+enum AdjustmentStatus {
+  pending
+  accepted
+  rejected
+  applied
+}
+
+enum AiCallStatus {
+  success
+  schema_failed
+  timeout
+  error
+  mocked
+}
+
+enum AiTaskType {
+  generate_assessment
+  generate_roadmap
+  generate_daily_tasks
+  recommend_resources
+  generate_review_adjustment
+}
+
+enum PlanVersionSource {
+  initial
+  user_edit
+  ai_adjustment
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String?  @unique
+  name      String?
+  timezone  String   @default("Asia/Shanghai")
+  isDemo    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  learningPlans LearningPlan[]
+  aiCallLogs    AiCallLog[]
+}
+
+model LearningPlan {
+  id                  String          @id @default(cuid())
+  userId              String
+  title               String
+  learningDirection   String
+  specificGoal        String
+  goalType            GoalType
+  status              PlanStatus      @default(draft)
+  foundationLevel     FoundationLevel @default(beginner)
+  durationDays        Int
+  dailyMinutes        Int
+  weeklyStudyDays     Int             @default(5)
+  preferredResources  String[]
+  targetOutcome       String?
+  startsOn            DateTime?
+  endsOn              DateTime?
+  reminderHour        Int             @default(20)
+  aiGenerated         Boolean         @default(false)
+  sourcePromptVersion String?
+  notes               String?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  user                    User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assessments             Assessment[]
+  roadmapStages           RoadmapStage[]
+  dailyTasks              DailyTask[]
+  resourceRecommendations ResourceRecommendation[]
+  progressLogs            ProgressLog[]
+  notesRecords            Note[]
+  reviews                 Review[]
+  planAdjustments         PlanAdjustment[]
+  planVersions            PlanVersion[]
+  aiCallLogs              AiCallLog[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Assessment {
+  id                 String           @id @default(cuid())
+  planId             String
+  status             AssessmentStatus @default(generated)
+  selfLevel          FoundationLevel?
+  generatedQuestions Json
+  answers            Json?
+  score              Int?
+  resultLevel        FoundationLevel?
+  strengths          String[]
+  weaknesses         String[]
+  confidenceNote     String?
+  createdAt          DateTime         @default(now())
+  completedAt        DateTime?
+
+  plan LearningPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@index([planId])
+  @@index([status])
+}
+
+model RoadmapStage {
+  id                  String      @id @default(cuid())
+  planId              String
+  title               String
+  sequence            Int
+  status              StageStatus @default(planned)
+  startsOn            DateTime?
+  endsOn              DateTime?
+  goal                String
+  contentOutline      String
+  expectedOutcome     String
+  acceptanceCriteria  String
+  aiGenerated         Boolean     @default(false)
+  sourcePromptVersion String?
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  plan                    LearningPlan             @relation(fields: [planId], references: [id], onDelete: Cascade)
+  dailyTasks              DailyTask[]
+  resourceRecommendations ResourceRecommendation[]
+  notes                   Note[]
+
+  @@unique([planId, sequence])
+  @@index([planId])
+}
+
+model DailyTask {
+  id                 String         @id @default(cuid())
+  planId             String
+  stageId            String?
+  title              String
+  description        String?
+  taskType           TaskType
+  status             TaskStatus     @default(todo)
+  difficulty         TaskDifficulty @default(medium)
+  scheduledFor       DateTime
+  estimatedMinutes   Int
+  completionCriteria String
+  isCore             Boolean        @default(true)
+  completedAt        DateTime?
+  delayedFrom        DateTime?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  plan         LearningPlan  @relation(fields: [planId], references: [id], onDelete: Cascade)
+  stage        RoadmapStage? @relation(fields: [stageId], references: [id], onDelete: SetNull)
+  progressLogs ProgressLog[]
+  notes        Note[]
+
+  @@index([planId, scheduledFor])
+  @@index([stageId])
+  @@index([status])
+}
+
+model ResourceRecommendation {
+  id                   String         @id @default(cuid())
+  planId               String
+  stageId              String?
+  title                String
+  resourceType         ResourceType
+  url                  String?
+  sourceName           String?
+  status               ResourceStatus @default(want_to_learn)
+  difficulty           TaskDifficulty @default(medium)
+  estimatedMinutes     Int?
+  recommendationReason String
+  verificationNote     String
+  requiresVerification Boolean        @default(true)
+  aiGenerated          Boolean        @default(false)
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  plan  LearningPlan  @relation(fields: [planId], references: [id], onDelete: Cascade)
+  stage RoadmapStage? @relation(fields: [stageId], references: [id], onDelete: SetNull)
+
+  @@index([planId])
+  @@index([stageId])
+  @@index([status])
+}
+
+model ProgressLog {
+  id        String          @id @default(cuid())
+  planId    String
+  taskId    String?
+  type      ProgressLogType
+  loggedFor DateTime
+  minutes   Int?
+  note      String?
+  createdAt DateTime        @default(now())
+
+  plan LearningPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  task DailyTask?   @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  @@index([planId, loggedFor])
+  @@index([taskId])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  planId    String
+  taskId    String?
+  stageId   String?
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  plan  LearningPlan  @relation(fields: [planId], references: [id], onDelete: Cascade)
+  task  DailyTask?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  stage RoadmapStage? @relation(fields: [stageId], references: [id], onDelete: SetNull)
+
+  @@index([planId])
+  @@index([taskId])
+  @@index([stageId])
+}
+
+model Review {
+  id                String     @id @default(cuid())
+  planId            String
+  reviewType        ReviewType @default(weekly)
+  periodStart       DateTime
+  periodEnd         DateTime
+  completionRate    Float
+  delayedTaskCount  Int        @default(0)
+  skippedTaskCount  Int        @default(0)
+  blockers          String?
+  satisfactionScore Int?
+  nextGoal          String?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  plan            LearningPlan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+  planAdjustments PlanAdjustment[]
+
+  @@index([planId, periodStart])
+}
+
+model PlanAdjustment {
+  id              String           @id @default(cuid())
+  planId          String
+  reviewId        String?
+  status          AdjustmentStatus @default(pending)
+  title           String
+  reason          String
+  impactScope     String
+  proposedChanges Json
+  beforeSnapshot  Json
+  afterSnapshot   Json?
+  aiGenerated     Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  confirmedAt     DateTime?
+  appliedAt       DateTime?
+
+  plan   LearningPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  review Review?      @relation(fields: [reviewId], references: [id], onDelete: SetNull)
+
+  @@index([planId])
+  @@index([status])
+}
+
+model PlanVersion {
+  id          String            @id @default(cuid())
+  planId      String
+  version     Int
+  source      PlanVersionSource
+  title       String
+  description String?
+  snapshot    Json
+  createdAt   DateTime          @default(now())
+
+  plan LearningPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, version])
+  @@index([planId])
+}
+
+model AiCallLog {
+  id            String       @id @default(cuid())
+  userId        String?
+  planId        String?
+  taskType      AiTaskType
+  status        AiCallStatus
+  provider      String       @default("mock")
+  model         String       @default("mock")
+  promptVersion String
+  input         Json
+  output        Json?
+  errorMessage  String?
+  tokenCount    Int?
+  estimatedCost Float?
+  latencyMs     Int?
+  createdAt     DateTime     @default(now())
+
+  user User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  plan LearningPlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([planId])
+  @@index([taskType, status])
+}
