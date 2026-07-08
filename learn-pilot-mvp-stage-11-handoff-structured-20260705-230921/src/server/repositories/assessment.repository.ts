@@ -15,6 +15,64 @@ export class AssessmentRepository {
     });
   }
 
+  findLatestGeneratedByPlan(planId: string) {
+    return this.db.assessment.findFirst({
+      where: { planId, status: "generated" },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  createGenerated({
+    planId,
+    generatedQuestions,
+  }: {
+    planId: string;
+    generatedQuestions: Prisma.InputJsonValue;
+  }) {
+    return this.create({
+      plan: { connect: { id: planId } },
+      status: "generated" satisfies AssessmentStatus,
+      generatedQuestions,
+      strengths: [],
+      weaknesses: [],
+    });
+  }
+
+  completeGenerated({
+    assessmentId,
+    selfLevel,
+    answers,
+    score,
+    resultLevel,
+    strengths,
+    weaknesses,
+    confidenceNote,
+  }: {
+    assessmentId: string;
+    selfLevel: FoundationLevel;
+    answers: Prisma.InputJsonValue;
+    score: number;
+    resultLevel: FoundationLevel;
+    strengths: string[];
+    weaknesses: string[];
+    confidenceNote: string;
+  }) {
+    return this.db.assessment.update({
+      where: { id: assessmentId },
+      data: {
+        status: "completed" satisfies AssessmentStatus,
+        selfLevel,
+        answers,
+        score,
+        resultLevel,
+        strengths,
+        weaknesses,
+        confidenceNote,
+        completedAt: new Date(),
+      },
+    });
+  }
+
   createCompleted({
     planId,
     selfLevel,

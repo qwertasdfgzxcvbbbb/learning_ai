@@ -36,3 +36,25 @@ describe("scoreAssessment", () => {
     expect(result.resultLevel).toBe("beginner");
   });
 });
+
+describe("buildAssessmentQuestions", () => {
+  it("uses AI-specific questions for AI learning goals", () => {
+    const questions = buildAssessmentQuestions({
+      learningDirection: "AI 产品经理",
+      specificGoal: "学习 RAG 和 LLM 应用设计",
+      goalType: "job_project",
+    });
+    const prompts = questions.map((question) => question.prompt).join("\n");
+
+    expect(prompts).toContain("LLM");
+    expect(prompts).toContain("RAG");
+  });
+
+  it("uses a different profile for programming goals", () => {
+    const aiQuestions = buildAssessmentQuestions("AI 产品经理");
+    const programmingQuestions = buildAssessmentQuestions("TypeScript 前端开发");
+
+    expect(programmingQuestions[0]?.id).not.toBe(aiQuestions[0]?.id);
+    expect(programmingQuestions.map((question) => question.prompt).join("\n")).toContain("500");
+  });
+});

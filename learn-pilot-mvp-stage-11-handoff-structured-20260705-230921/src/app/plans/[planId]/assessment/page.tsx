@@ -27,7 +27,7 @@ export default async function AssessmentPage({ params }: AssessmentPageProps) {
           <section className="space-y-2">
             <h1 className="text-2xl font-semibold tracking-normal">{assessment.plan.title}</h1>
             <p className="text-sm leading-6 text-muted-foreground">
-              这组题目会根据当前学习方向生成一个保守的基础判断。MVP 先使用 mock 题目，后续再接真实 AI。
+              这组题目会根据当前学习方向生成基础判断，优先使用贴近考试和实际场景的单选题。
             </p>
           </section>
 

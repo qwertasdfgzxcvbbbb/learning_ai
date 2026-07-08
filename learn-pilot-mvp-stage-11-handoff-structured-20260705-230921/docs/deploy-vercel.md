@@ -40,6 +40,8 @@ SENTRY_DSN=
 
 如果数据库服务只给了一个连接串，先把 `DATABASE_URL` 和 `DIRECT_URL` 都填成同一个值也可以。正式生产环境更推荐 `DATABASE_URL` 用 pooled 连接，`DIRECT_URL` 用 direct 连接。
 
+默认 `OPENAI_MODEL=mock` 时不会调用 GPT。要让基础测评题由 GPT 生成，把 `OPENAI_MODEL` 改成你的 OpenAI 模型名，并填入 `OPENAI_API_KEY`。如果 GPT 调用失败，应用会自动回退到本地领域题库。
+
 ## 3. 首次部署
 
 保存环境变量后点击 Deploy。构建命令会自动执行：
