@@ -197,6 +197,10 @@ function isReusableGeneratedQuestionSet(
   plan: NonNullable<Awaited<ReturnType<PlanRepository["findById"]>>>,
   questions: AssessmentQuestion[],
 ) {
+  if (containsObviousLegacyDistractors(questions)) {
+    return false;
+  }
+
   const legacyGenericIds = new Set([
     "concept",
     "practice",
@@ -208,7 +212,16 @@ function isReusableGeneratedQuestionSet(
   const isLegacyGeneric = questions.every((question) => legacyGenericIds.has(question.id));
 
   if (!isLegacyGeneric) {
-    return true;
+    const currentLocalIds = new Set(
+      buildAssessmentQuestions({
+        learningDirection: plan.learningDirection,
+        specificGoal: plan.specificGoal,
+        goalType: plan.goalType,
+      }).map((question) => question.id),
+    );
+    const isKnownLocalSet = questions.every((question) => currentLocalIds.has(question.id));
+
+    return !isKnownLocalSet || questions.length === currentLocalIds.size;
   }
 
   const currentLocalIds = new Set(
@@ -220,4 +233,27 @@ function isReusableGeneratedQuestionSet(
   );
 
   return questions.every((question) => currentLocalIds.has(question.id));
+}
+
+function containsObviousLegacyDistractors(questions: AssessmentQuestion[]) {
+  const optionText = questions
+    .flatMap((question) => question.options.map((option) => option.label))
+    .join("\n");
+  const staleFragments = [
+    "只用于保存业务数据的关系型数据库",
+    "只负责把用户问题翻译成英文",
+    "给数据库表自动添加主键",
+    "把回答温度调高",
+    "删除所有引用",
+    "让模型训练速度更快",
+    "Agent 只能聊天",
+    "立即重写整个项目",
+    "直接删除 .git 文件夹",
+    "只测试按钮颜色",
+    "封面最好看",
+    "只把正确答案抄一遍",
+    "堆砌生僻词",
+  ];
+
+  return staleFragments.some((fragment) => optionText.includes(fragment));
 }
