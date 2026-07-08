@@ -2,10 +2,13 @@ import { DEMO_USER_ID } from "@/lib/constants";
 import { getBeijingDayRange } from "@/lib/dates";
 import type { PlanCreationInput } from "@/features/plan-creation/schema";
 import { PlanRepository } from "@/server/repositories/plan.repository";
+import { ensureDemoUser } from "@/server/services/demo-user.service";
 
 const planRepository = new PlanRepository();
 
 export async function createDraftPlan(input: PlanCreationInput) {
+  await ensureDemoUser();
+
   const startsOn = getBeijingDayRange().start;
   const endsOn = new Date(startsOn);
   endsOn.setUTCDate(endsOn.getUTCDate() + input.durationDays - 1);

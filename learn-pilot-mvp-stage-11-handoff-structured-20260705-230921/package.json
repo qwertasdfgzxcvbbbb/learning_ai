@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "build:app": "next build",
+    "vercel-build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
     "start:mobile": "next start -H 0.0.0.0 -p 3000",
     "typecheck": "tsc --noEmit",
@@ -17,6 +18,7 @@
     "test:e2e": "playwright test",
     "prisma:generate": "prisma generate",
     "prisma:format": "prisma format",
+    "db:deploy": "prisma migrate deploy",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed"
   },
