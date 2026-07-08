@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="学径 AI">
-  <rect width="512" height="512" rx="112" fill="#167f76"/>
-  <circle cx="368" cy="150" r="56" fill="#f6a032"/>
-  <path d="M120 154c0-27 22-49 49-49h139c13 0 24 11 24 24v254c0 13-11 24-24 24H169c-27 0-49-22-49-49V154z" fill="#f8fafc"/>
-  <path d="M169 105h139c13 0 24 11 24 24v245H169c-14 0-25-11-25-25V130c0-14 11-25 25-25z" fill="#ffffff"/>
-  <path d="M190 178h95M190 232h95M190 286h66" stroke="#167f76" stroke-width="28" stroke-linecap="round"/>
-  <path d="M344 302c-38 0-69 31-69 69 0 12 3 24 9 34l-25 49 53-20c10 5 21 7 32 7 38 0 69-31 69-69s-31-70-69-70z" fill="#0f2f2c"/>
-  <path d="M318 373h53M345 347v53" stroke="#f8fafc" stroke-width="20" stroke-linecap="round"/>
-</svg>

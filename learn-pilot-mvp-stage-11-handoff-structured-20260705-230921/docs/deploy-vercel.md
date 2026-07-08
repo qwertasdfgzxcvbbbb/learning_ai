@@ -52,12 +52,11 @@ next build
 
 迁移完成后，数据库表会自动创建。
 
-## 4. 手机安装
+## 4. Web 访问
 
-部署成功后，用手机浏览器打开 Vercel 给你的 HTTPS 地址：
+部署成功后，用电脑或手机浏览器打开 Vercel 给你的 HTTPS 地址即可使用。
 
-- Android Chrome：菜单 -> 安装应用 / 添加到主屏幕
-- iPhone Safari：分享按钮 -> 添加到主屏幕
+这个项目现在按普通 Web 模式运行，不再启用 PWA 安装和 service worker 缓存。
 
 ## 5. 常见问题
 
