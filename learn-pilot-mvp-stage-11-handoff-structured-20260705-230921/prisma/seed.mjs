@@ -49,6 +49,20 @@ async function main() {
             contentOutline: "AI 产品类型、LLM、Prompt、RAG、常见能力边界。",
             expectedOutcome: "一张 AI 产品能力地图。",
             acceptanceCriteria: "完成概念题和一份案例分析。",
+            sequenceRationale:
+              "先学 LLM、Prompt 和 RAG 基础，是因为后续需求分析和 PRD 都依赖这些能力边界判断。",
+            sourceReferences: [
+              {
+                title: "OpenAI Text generation guide",
+                url: "https://platform.openai.com/docs/guides/text-generation",
+                note: "用于核验 LLM 输入输出、提示词和模型能力边界。",
+              },
+              {
+                title: "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+                url: "https://arxiv.org/abs/2005.11401",
+                note: "用于核验 RAG 的核心思想。",
+              },
+            ],
             aiGenerated: true,
             sourcePromptVersion: "mock-roadmap-v1",
           },
@@ -62,6 +76,20 @@ async function main() {
             contentOutline: "用户场景、需求分层、AI 风险、数据输入输出。",
             expectedOutcome: "一份竞品或案例分析表。",
             acceptanceCriteria: "能说明一个 AI App 的用户流程和 AI 输入输出。",
+            sequenceRationale:
+              "在基础概念之后再做需求分析，可以把模型能力、数据来源和风险一起纳入产品判断。",
+            sourceReferences: [
+              {
+                title: "OpenAI Evals guide",
+                url: "https://platform.openai.com/docs/guides/evals",
+                note: "用于核验 AI 功能如何设计测试集和评价标准。",
+              },
+              {
+                title: "NIST AI Risk Management Framework",
+                url: "https://www.nist.gov/itl/ai-risk-management-framework",
+                note: "用于核验风险、可靠性和治理维度。",
+              },
+            ],
             aiGenerated: true,
             sourcePromptVersion: "mock-roadmap-v1",
           },

@@ -15,6 +15,13 @@ const stages: StageView[] = [
     contentOutline: "核心概念、典型案例、资料筛选方法。",
     expectedOutcome: "一份基础概念卡片。",
     acceptanceCriteria: "能解释 5 个核心概念。",
+    sequenceRationale: "先建立概念地图，再进入案例练习。",
+    sourceReferences: [
+      {
+        title: "当前计划输入",
+        note: "使用目标、周期和每日时长约束路线。",
+      },
+    ],
     aiGenerated: true,
     sourcePromptVersion: "mock-roadmap-v1",
   },
@@ -29,6 +36,14 @@ const stages: StageView[] = [
     contentOutline: "案例分析、流程拆解、风险识别。",
     expectedOutcome: "一份案例分析表。",
     acceptanceCriteria: "能说明案例的输入输出。",
+    sequenceRationale: "掌握基础概念后再拆解案例。",
+    sourceReferences: [
+      {
+        title: "OpenAI Evals guide",
+        url: "https://platform.openai.com/docs/guides/evals",
+        note: "用于核验评估方式。",
+      },
+    ],
     aiGenerated: true,
     sourcePromptVersion: "mock-roadmap-v1",
   },
@@ -48,6 +63,9 @@ describe("RoadmapList", () => {
     expect(screen.getByText("1. 基础认知")).toBeInTheDocument();
     expect(screen.getByText("2. 案例练习")).toBeInTheDocument();
     expect(screen.getAllByText("内容提纲")).toHaveLength(2);
+    expect(screen.getAllByText("排序依据")).toHaveLength(2);
+    expect(screen.getAllByText("可核验来源")).toHaveLength(2);
+    expect(screen.getByText("OpenAI Evals guide")).toBeInTheDocument();
     expect(screen.getByText("案例分析、流程拆解、风险识别。")).toBeInTheDocument();
 
     fireEvent.click(screen.getAllByLabelText("收起阶段")[1]);

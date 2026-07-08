@@ -32,6 +32,11 @@ describe("generateMockRoadmap", () => {
       "AI 产品方案与评估指标",
       "AI App PRD 与作品打磨",
     ]);
+    expect(result.output.stages.every((stage) => stage.sequenceRationale.length > 0)).toBe(true);
+    expect(result.output.stages.every((stage) => stage.sourceReferences.length > 0)).toBe(true);
+    expect(
+      result.output.stages[1]?.sourceReferences.some((source) => source.url?.includes("arxiv.org")),
+    ).toBe(true);
     expect(result.output.tasks.length).toBeGreaterThanOrEqual(2);
     expect(result.output.resources.length).toBeGreaterThanOrEqual(2);
   });

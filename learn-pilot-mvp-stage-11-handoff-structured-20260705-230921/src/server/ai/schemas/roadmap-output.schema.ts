@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+export const roadmapSourceReferenceOutputSchema = z.object({
+  title: z.string().min(2),
+  url: z.string().url().optional(),
+  note: z.string().min(4),
+});
+
 export const roadmapStageOutputSchema = z.object({
   title: z.string().min(2),
   sequence: z.number().int().min(1),
@@ -7,6 +13,8 @@ export const roadmapStageOutputSchema = z.object({
   contentOutline: z.string().min(8),
   expectedOutcome: z.string().min(4),
   acceptanceCriteria: z.string().min(4),
+  sequenceRationale: z.string().min(6),
+  sourceReferences: z.array(roadmapSourceReferenceOutputSchema).min(1).max(4),
   durationDays: z.number().int().min(1).max(30),
 });
 

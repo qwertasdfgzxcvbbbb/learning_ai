@@ -24,6 +24,68 @@ export type GenerateRoadmapResult = {
   output: RoadmapOutput;
 };
 
+const planningInputReferences = [
+  {
+    title: "当前计划输入",
+    note: "使用学习方向、具体目标、周期、每日可用时间和偏好资源约束路线。",
+  },
+  {
+    title: "最近一次基础测评",
+    note: "使用测评分数、基础等级、优势和薄弱点决定阶段难度与先后顺序。",
+  },
+];
+
+const aiSourceReferences = {
+  prompt: [
+    {
+      title: "OpenAI Text generation guide",
+      url: "https://platform.openai.com/docs/guides/text-generation",
+      note: "用于核验 LLM 输入输出、提示词和模型能力边界。",
+    },
+    {
+      title: "OpenAI Structured Outputs guide",
+      url: "https://platform.openai.com/docs/guides/structured-outputs",
+      note: "用于核验为什么早期要学习结构化输出和输出约束。",
+    },
+  ],
+  rag: [
+    {
+      title: "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+      url: "https://arxiv.org/abs/2005.11401",
+      note: "用于核验 RAG 的核心思想：先检索相关资料，再辅助生成回答。",
+    },
+    {
+      title: "OpenAI Embeddings guide",
+      url: "https://platform.openai.com/docs/guides/embeddings",
+      note: "用于核验 Embedding、语义相似度和向量检索的基础作用。",
+    },
+  ],
+  evaluation: [
+    {
+      title: "OpenAI Evals guide",
+      url: "https://platform.openai.com/docs/guides/evals",
+      note: "用于核验为什么 AI 产品需要测试集、评价标准和持续评估。",
+    },
+    {
+      title: "NIST AI Risk Management Framework",
+      url: "https://www.nist.gov/itl/ai-risk-management-framework",
+      note: "用于核验风险、可靠性、安全和治理维度。",
+    },
+  ],
+  prd: [
+    {
+      title: "OpenAI Evals guide",
+      url: "https://platform.openai.com/docs/guides/evals",
+      note: "用于把 PRD 的验收标准落到可测试的样例和指标上。",
+    },
+    {
+      title: "NIST AI Risk Management Framework",
+      url: "https://www.nist.gov/itl/ai-risk-management-framework",
+      note: "用于把风险、失败兜底和上线前检查写进产品方案。",
+    },
+  ],
+};
+
 export function generateMockRoadmap(input: GenerateRoadmapInput): GenerateRoadmapResult {
   if (isAiPlan(input.plan)) {
     return generateAiRoadmap(input);
@@ -44,6 +106,8 @@ export function generateMockRoadmap(input: GenerateRoadmapInput): GenerateRoadma
         contentOutline: "核心概念、典型案例、常见术语、资料筛选方法。",
         expectedOutcome: "形成一份基础概念卡片和案例拆解笔记。",
         acceptanceCriteria: "能用自己的话解释 5 个核心概念，并完成 1 个案例拆解。",
+        sequenceRationale: "先建立术语和概念地图，后续案例练习和作品输出才有判断标准。",
+        sourceReferences: planningInputReferences,
         durationDays: Math.max(3, Math.min(7, Math.ceil(input.plan.durationDays * 0.25))),
       },
       {
@@ -53,6 +117,9 @@ export function generateMockRoadmap(input: GenerateRoadmapInput): GenerateRoadma
         contentOutline: "案例分析、流程拆解、需求判断、常见风险。",
         expectedOutcome: "完成一份结构化案例分析表。",
         acceptanceCriteria: "能说明一个案例的目标用户、关键流程、输入输出和风险点。",
+        sequenceRationale:
+          "在理解概念后进入案例，把抽象知识放入真实流程里验证，避免直接做作品时只靠猜测。",
+        sourceReferences: planningInputReferences,
         durationDays: Math.max(4, Math.min(10, Math.ceil(input.plan.durationDays * 0.35))),
       },
       {
@@ -62,6 +129,8 @@ export function generateMockRoadmap(input: GenerateRoadmapInput): GenerateRoadma
         contentOutline: "选题、结构化输出、检查清单、复盘改进。",
         expectedOutcome: input.plan.targetOutcome ?? "完成一份可展示的学习作品。",
         acceptanceCriteria: "产出完整草稿，并根据检查清单完成一次自查。",
+        sequenceRationale: "最后安排作品输出，是因为它需要复用前面建立的概念、案例拆解和自查标准。",
+        sourceReferences: planningInputReferences,
         durationDays: Math.max(5, Math.min(14, Math.ceil(input.plan.durationDays * 0.4))),
       },
     ],
@@ -163,6 +232,9 @@ function generateAiRoadmap(input: GenerateRoadmapInput): GenerateRoadmapResult {
         expectedOutcome: "完成一张 LLM / Prompt / Token / 上下文窗口 / 幻觉的概念对照表。",
         acceptanceCriteria:
           "能判断一个需求是否适合直接调用 LLM，并能写出包含角色、任务、约束和输出格式的 Prompt。",
+        sequenceRationale:
+          "先学 LLM 与 Prompt，是因为它们是理解所有 AI 应用输入输出、能力边界和后续 RAG/评估设计的共同基础。",
+        sourceReferences: aiSourceReferences.prompt,
         durationDays: stage1Days,
       },
       {
@@ -174,6 +246,9 @@ function generateAiRoadmap(input: GenerateRoadmapInput): GenerateRoadmapResult {
         expectedOutcome: "画出一个知识库问答产品的 RAG 流程图，并标注每一步的输入、输出和风险。",
         acceptanceCriteria:
           "能解释 Embedding 与向量检索的作用，并能说明为什么需要引用来源、召回评估和拒答规则。",
+        sequenceRationale:
+          "RAG 需要先理解模型输入输出和 Prompt 约束，再学习检索、Embedding、引用来源和拒答策略。",
+        sourceReferences: aiSourceReferences.rag,
         durationDays: stage2Days,
       },
       {
@@ -185,6 +260,9 @@ function generateAiRoadmap(input: GenerateRoadmapInput): GenerateRoadmapResult {
         expectedOutcome: "完成一份 AI 功能方案表，包含目标用户、核心流程、指标、风险和验收方式。",
         acceptanceCriteria:
           "能说明一个 AI 功能上线前要验证哪些指标，并能区分体验问题、数据问题和模型能力问题。",
+        sequenceRationale:
+          "在掌握 LLM 与 RAG 流程后再定义产品方案和评估指标，才能把模型能力、数据质量、用户体验和风险放到同一个验收框架里。",
+        sourceReferences: aiSourceReferences.evaluation,
         durationDays: stage3Days,
       },
       {
@@ -196,6 +274,9 @@ function generateAiRoadmap(input: GenerateRoadmapInput): GenerateRoadmapResult {
         expectedOutcome: outputTarget,
         acceptanceCriteria:
           "PRD 至少包含用户问题、核心流程、AI 能力边界、数据来源、评估指标、失败兜底和下一版迭代计划。",
+        sequenceRationale:
+          "最后写 PRD，是因为完整方案需要依赖前面形成的概念判断、RAG 链路、评估指标和风险清单。",
+        sourceReferences: aiSourceReferences.prd,
         durationDays: stage4Days,
       },
     ],

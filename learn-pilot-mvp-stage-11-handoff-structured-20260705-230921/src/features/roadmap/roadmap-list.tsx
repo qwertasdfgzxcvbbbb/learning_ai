@@ -1,11 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, ChevronDown, ChevronUp, Clock3, Route, Sparkles } from "lucide-react";
+import {
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Clock3,
+  ExternalLink,
+  Route,
+  Sparkles,
+} from "lucide-react";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { ResourceView, StageView, TaskView } from "@/server/services/dashboard.service";
+import type {
+  ResourceView,
+  RoadmapSourceReferenceView,
+  StageView,
+  TaskView,
+} from "@/server/services/dashboard.service";
 
 type RoadmapListProps = {
   stages: StageView[];
@@ -114,6 +127,10 @@ export function RoadmapList({ stages, tasks = [], resources = [] }: RoadmapListP
                   <InfoBlock label="内容提纲" value={stage.contentOutline} />
                   <InfoBlock label="预期产出" value={stage.expectedOutcome} />
                   <InfoBlock label="验收方式" value={stage.acceptanceCriteria} />
+                  {stage.sequenceRationale ? (
+                    <InfoBlock label="排序依据" value={stage.sequenceRationale} />
+                  ) : null}
+                  <SourceReferenceBlock references={stage.sourceReferences} />
                   <StageTaskBlock tasks={stageTasks} />
                   <StageResourceBlock resources={stageResources} />
                   <div className="rounded-md bg-muted px-3 py-2 text-xs leading-5">
@@ -127,6 +144,41 @@ export function RoadmapList({ stages, tasks = [], resources = [] }: RoadmapListP
         );
       })}
     </section>
+  );
+}
+
+function SourceReferenceBlock({ references }: { references: RoadmapSourceReferenceView[] }) {
+  if (references.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="rounded-md bg-muted px-3 py-2">
+      <div className="text-xs font-medium text-foreground">可核验来源</div>
+      <div className="mt-2 space-y-2">
+        {references.map((reference) => (
+          <div
+            key={`${reference.title}-${reference.url ?? "local"}`}
+            className="space-y-1 border-t border-border/60 pt-2 first:border-t-0 first:pt-0"
+          >
+            {reference.url ? (
+              <a
+                href={reference.url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-xs font-medium text-primary underline-offset-4 hover:underline"
+              >
+                {reference.title}
+                <ExternalLink className="h-3 w-3" aria-hidden="true" />
+              </a>
+            ) : (
+              <div className="text-xs font-medium text-foreground">{reference.title}</div>
+            )}
+            <p className="text-xs leading-5 text-muted-foreground">{reference.note}</p>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 

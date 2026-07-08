@@ -218,6 +218,8 @@ model RoadmapStage {
   contentOutline      String
   expectedOutcome     String
   acceptanceCriteria  String
+  sequenceRationale   String      @default("")
+  sourceReferences    Json?
   aiGenerated         Boolean     @default(false)
   sourcePromptVersion String?
   createdAt           DateTime    @default(now())

@@ -69,6 +69,8 @@ export async function generateRoadmapForPlan(
             contentOutline: stage.contentOutline,
             expectedOutcome: stage.expectedOutcome,
             acceptanceCriteria: stage.acceptanceCriteria,
+            sequenceRationale: stage.sequenceRationale,
+            sourceReferences: toJson(stage.sourceReferences),
             aiGenerated: true,
             sourcePromptVersion: generated.promptVersion,
           },

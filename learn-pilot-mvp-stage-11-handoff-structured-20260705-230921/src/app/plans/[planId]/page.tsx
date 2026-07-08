@@ -100,6 +100,11 @@ export default async function PlanDetailPage({ params, searchParams }: PlanDetai
                         <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
                           {stage.goal}
                         </p>
+                        {stage.sequenceRationale ? (
+                          <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
+                            排序依据：{stage.sequenceRationale}
+                          </p>
+                        ) : null}
                       </div>
                     ))}
                   </div>

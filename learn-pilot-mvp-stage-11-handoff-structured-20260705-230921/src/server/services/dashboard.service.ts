@@ -64,6 +64,12 @@ export type ResourceView = {
   verificationNote: string;
 };
 
+export type RoadmapSourceReferenceView = {
+  title: string;
+  url?: string;
+  note: string;
+};
+
 export type NoteView = {
   id: string;
   content: string;
@@ -82,6 +88,8 @@ export type StageView = {
   contentOutline: string;
   expectedOutcome: string;
   acceptanceCriteria: string;
+  sequenceRationale: string;
+  sourceReferences: RoadmapSourceReferenceView[];
   aiGenerated: boolean;
   sourcePromptVersion: string | null;
 };
@@ -313,9 +321,37 @@ function toStageView(stage: RoadmapStage): StageView {
     contentOutline: stage.contentOutline,
     expectedOutcome: stage.expectedOutcome,
     acceptanceCriteria: stage.acceptanceCriteria,
+    sequenceRationale: stage.sequenceRationale,
+    sourceReferences: toSourceReferences(stage.sourceReferences),
     aiGenerated: stage.aiGenerated,
     sourcePromptVersion: stage.sourcePromptVersion,
   };
+}
+
+function toSourceReferences(value: unknown): RoadmapSourceReferenceView[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((item) => {
+      if (!item || typeof item !== "object") {
+        return null;
+      }
+
+      const reference = item as Record<string, unknown>;
+      const title = typeof reference.title === "string" ? reference.title : "";
+      const url = typeof reference.url === "string" ? reference.url : undefined;
+      const note = typeof reference.note === "string" ? reference.note : "";
+
+      if (!title || !note) {
+        return null;
+      }
+
+      const parsed: RoadmapSourceReferenceView = url ? { title, url, note } : { title, note };
+      return parsed;
+    })
+    .filter((item): item is RoadmapSourceReferenceView => item !== null);
 }
 
 function toAssessmentView(assessment: Assessment) {
