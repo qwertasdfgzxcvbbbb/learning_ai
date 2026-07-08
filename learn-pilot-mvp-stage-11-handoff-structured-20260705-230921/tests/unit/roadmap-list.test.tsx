@@ -44,13 +44,14 @@ describe("RoadmapList", () => {
   it("renders stages and expands details", () => {
     render(<RoadmapList stages={stages} />);
 
+    expect(screen.getByText("AI 路线图详情")).toBeInTheDocument();
     expect(screen.getByText("1. 基础认知")).toBeInTheDocument();
     expect(screen.getByText("2. 案例练习")).toBeInTheDocument();
-    expect(screen.getByText("内容提纲")).toBeInTheDocument();
-    expect(screen.queryByText("案例分析、流程拆解、风险识别。")).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getAllByLabelText("展开阶段")[0]);
-
+    expect(screen.getAllByText("内容提纲")).toHaveLength(2);
     expect(screen.getByText("案例分析、流程拆解、风险识别。")).toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByLabelText("收起阶段")[1]);
+
+    expect(screen.queryByText("案例分析、流程拆解、风险识别。")).not.toBeInTheDocument();
   });
 });

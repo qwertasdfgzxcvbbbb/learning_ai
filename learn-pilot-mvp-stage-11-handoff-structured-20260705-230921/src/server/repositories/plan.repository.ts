@@ -13,7 +13,17 @@ export class PlanRepository {
       where: { id },
       include: {
         roadmapStages: { orderBy: { sequence: "asc" } },
-        dailyTasks: { orderBy: { scheduledFor: "asc" } },
+        dailyTasks: {
+          include: {
+            stage: {
+              select: {
+                sequence: true,
+                title: true,
+              },
+            },
+          },
+          orderBy: { scheduledFor: "asc" },
+        },
         resourceRecommendations: {
           include: {
             stage: {

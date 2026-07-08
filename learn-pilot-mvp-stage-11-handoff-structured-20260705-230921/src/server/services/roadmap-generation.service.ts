@@ -8,18 +8,26 @@ const planRepository = new PlanRepository();
 
 export type RoadmapGenerationResult =
   | { status: "generated"; planId: string }
+  | { status: "regenerated"; planId: string }
   | { status: "already-exists"; planId: string }
   | { status: "assessment-required"; planId: string }
   | { status: "not-found" };
 
-export async function generateRoadmapForPlan(planId: string): Promise<RoadmapGenerationResult> {
+type GenerateRoadmapOptions = {
+  force?: boolean;
+};
+
+export async function generateRoadmapForPlan(
+  planId: string,
+  options: GenerateRoadmapOptions = {},
+): Promise<RoadmapGenerationResult> {
   const plan = await planRepository.findById(planId);
 
   if (!plan || plan.userId !== DEMO_USER_ID) {
     return { status: "not-found" };
   }
 
-  if (plan.roadmapStages.length > 0) {
+  if (plan.roadmapStages.length > 0 && !options.force) {
     return { status: "already-exists", planId: plan.id };
   }
 
@@ -35,9 +43,18 @@ export async function generateRoadmapForPlan(planId: string): Promise<RoadmapGen
   });
 
   await prisma.$transaction(async (tx) => {
+    if (options.force) {
+      await tx.resourceRecommendation.deleteMany({ where: { planId: plan.id } });
+      await tx.dailyTask.deleteMany({ where: { planId: plan.id } });
+      await tx.roadmapStage.deleteMany({ where: { planId: plan.id } });
+    }
+
     const createdStages = await Promise.all(
       generated.output.stages.map((stage) => {
-        const startsOn = addDays(plan.startsOn ?? new Date(), getStageStartOffset(generated.output.stages, stage.sequence));
+        const startsOn = addDays(
+          plan.startsOn ?? new Date(),
+          getStageStartOffset(generated.output.stages, stage.sequence),
+        );
         const endsOn = addDays(startsOn, stage.durationDays - 1);
 
         return tx.roadmapStage.create({
@@ -131,10 +148,13 @@ export async function generateRoadmapForPlan(planId: string): Promise<RoadmapGen
     });
   });
 
-  return { status: "generated", planId: plan.id };
+  return { status: options.force ? "regenerated" : "generated", planId: plan.id };
 }
 
-function getStageStartOffset(stages: { sequence: number; durationDays: number }[], sequence: number) {
+function getStageStartOffset(
+  stages: { sequence: number; durationDays: number }[],
+  sequence: number,
+) {
   return stages
     .filter((stage) => stage.sequence < sequence)
     .reduce((sum, stage) => sum + stage.durationDays, 0);

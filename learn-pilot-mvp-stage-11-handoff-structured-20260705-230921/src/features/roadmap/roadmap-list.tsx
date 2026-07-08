@@ -1,18 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronUp, Route, Sparkles } from "lucide-react";
+import { CheckCircle2, ChevronDown, ChevronUp, Clock3, Route, Sparkles } from "lucide-react";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { StageView } from "@/server/services/dashboard.service";
+import type { ResourceView, StageView, TaskView } from "@/server/services/dashboard.service";
 
 type RoadmapListProps = {
   stages: StageView[];
+  tasks?: TaskView[];
+  resources?: ResourceView[];
 };
 
-export function RoadmapList({ stages }: RoadmapListProps) {
-  const [openStageIds, setOpenStageIds] = useState(() => new Set(stages[0] ? [stages[0].id] : []));
+export function RoadmapList({ stages, tasks = [], resources = [] }: RoadmapListProps) {
+  const [openStageIds, setOpenStageIds] = useState(() => new Set(stages.map((stage) => stage.id)));
 
   if (stages.length === 0) {
     return (
@@ -41,8 +43,10 @@ export function RoadmapList({ stages }: RoadmapListProps) {
     <section className="space-y-3">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-base font-semibold">学习路线</h2>
-          <p className="mt-1 text-xs text-muted-foreground">内容可调整，执行前请结合自己的时间核验。</p>
+          <h2 className="text-base font-semibold">AI 路线图详情</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            每个阶段都展开显示目标、任务和资料，执行前请结合自己的时间核验。
+          </p>
         </div>
         <span className="shrink-0 rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
           {stages.length} 阶段
@@ -58,6 +62,10 @@ export function RoadmapList({ stages }: RoadmapListProps) {
 
       {stages.map((stage) => {
         const isOpen = openStageIds.has(stage.id);
+        const stageTasks = tasks.filter((task) => task.stageSequence === stage.sequence);
+        const stageResources = resources.filter(
+          (resource) => resource.stageSequence === stage.sequence,
+        );
 
         return (
           <Card key={stage.id}>
@@ -74,7 +82,9 @@ export function RoadmapList({ stages }: RoadmapListProps) {
                       </CardTitle>
                       <p className="mt-1 text-xs text-muted-foreground">
                         {stage.statusLabel}
-                        {stage.startsOn && stage.endsOn ? ` · ${stage.startsOn} - ${stage.endsOn}` : ""}
+                        {stage.startsOn && stage.endsOn
+                          ? ` · ${stage.startsOn} - ${stage.endsOn}`
+                          : ""}
                       </p>
                     </div>
                     <Button
@@ -104,6 +114,8 @@ export function RoadmapList({ stages }: RoadmapListProps) {
                   <InfoBlock label="内容提纲" value={stage.contentOutline} />
                   <InfoBlock label="预期产出" value={stage.expectedOutcome} />
                   <InfoBlock label="验收方式" value={stage.acceptanceCriteria} />
+                  <StageTaskBlock tasks={stageTasks} />
+                  <StageResourceBlock resources={stageResources} />
                   <div className="rounded-md bg-muted px-3 py-2 text-xs leading-5">
                     来源：{stage.aiGenerated ? "mock AI 生成" : "用户创建"}
                     {stage.sourcePromptVersion ? ` · ${stage.sourcePromptVersion}` : ""}
@@ -115,6 +127,69 @@ export function RoadmapList({ stages }: RoadmapListProps) {
         );
       })}
     </section>
+  );
+}
+
+function StageTaskBlock({ tasks }: { tasks: TaskView[] }) {
+  if (tasks.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="rounded-md bg-muted px-3 py-2">
+      <div className="text-xs font-medium text-foreground">阶段任务</div>
+      <div className="mt-2 space-y-2">
+        {tasks.slice(0, 3).map((task) => (
+          <div
+            key={task.id}
+            className="space-y-1 border-t border-border/60 pt-2 first:border-t-0 first:pt-0"
+          >
+            <div className="text-xs font-medium text-foreground">{task.title}</div>
+            <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+              <span className="inline-flex items-center gap-1">
+                <Clock3 className="h-3.5 w-3.5" aria-hidden="true" />
+                {task.estimatedMinutes} 分钟
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                {task.taskTypeLabel} · {task.statusLabel}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+      {tasks.length > 3 ? (
+        <p className="mt-2 text-xs leading-5 text-muted-foreground">
+          还有 {tasks.length - 3} 个任务在下方任务列表中。
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function StageResourceBlock({ resources }: { resources: ResourceView[] }) {
+  if (resources.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="rounded-md bg-muted px-3 py-2">
+      <div className="text-xs font-medium text-foreground">推荐资料</div>
+      <div className="mt-2 space-y-2">
+        {resources.slice(0, 2).map((resource) => (
+          <div
+            key={resource.id}
+            className="space-y-1 border-t border-border/60 pt-2 first:border-t-0 first:pt-0"
+          >
+            <div className="text-xs font-medium text-foreground">{resource.title}</div>
+            <p className="text-xs leading-5 text-muted-foreground">
+              {resource.typeLabel} · {resource.difficultyLabel}
+              {resource.estimatedMinutes ? ` · ${resource.estimatedMinutes} 分钟` : ""}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 

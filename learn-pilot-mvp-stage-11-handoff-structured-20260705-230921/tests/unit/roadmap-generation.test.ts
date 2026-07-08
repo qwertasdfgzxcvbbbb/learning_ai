@@ -25,7 +25,13 @@ describe("generateMockRoadmap", () => {
     });
 
     expect(result.promptVersion).toBe("mock-roadmap-v1");
-    expect(result.output.stages).toHaveLength(3);
+    expect(result.output.stages).toHaveLength(4);
+    expect(result.output.stages.map((stage) => stage.title)).toEqual([
+      "LLM 与 Prompt 基础判断",
+      "RAG 知识库问答流程",
+      "AI 产品方案与评估指标",
+      "AI App PRD 与作品打磨",
+    ]);
     expect(result.output.tasks.length).toBeGreaterThanOrEqual(2);
     expect(result.output.resources.length).toBeGreaterThanOrEqual(2);
   });

@@ -86,9 +86,32 @@ export default async function PlanDetailPage({ params, searchParams }: PlanDetai
             </CardHeader>
             <CardContent className="space-y-3">
               {detail.stages.length > 0 ? (
-                <p className="text-sm leading-6 text-muted-foreground">
-                  路线图已生成。内容来自 mock AI，后续可以继续编辑和复盘调整。
-                </p>
+                <>
+                  <p className="text-sm leading-6 text-muted-foreground">
+                    已生成 {detail.stages.length} 个 AI
+                    学习阶段。下面先显示路线预览，完整任务和资料在页面下方。
+                  </p>
+                  <div className="space-y-2">
+                    {detail.stages.map((stage) => (
+                      <div key={stage.id} className="rounded-md bg-muted px-3 py-2">
+                        <div className="text-sm font-medium text-foreground">
+                          {stage.sequence}. {stage.title}
+                        </div>
+                        <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
+                          {stage.goal}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  <form action={generateRoadmapAction}>
+                    <input type="hidden" name="planId" value={detail.plan.id} />
+                    <input type="hidden" name="mode" value="regenerate" />
+                    <Button type="submit" variant="outline" className="w-full">
+                      <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                      重新生成 AI 路线图
+                    </Button>
+                  </form>
+                </>
               ) : detail.latestAssessment ? (
                 <>
                   <p className="text-sm leading-6 text-muted-foreground">
@@ -127,7 +150,7 @@ export default async function PlanDetailPage({ params, searchParams }: PlanDetai
           </Card>
 
           <ProgressSummary plan={detail.plan} />
-          <RoadmapList stages={detail.stages} />
+          <RoadmapList stages={detail.stages} tasks={detail.tasks} resources={detail.resources} />
           <TaskList title="全部任务" tasks={detail.tasks} />
           <ResourceList resources={detail.resources} />
           <NotePanel planId={detail.plan.id} tasks={detail.tasks} notes={detail.notes} />
@@ -140,6 +163,7 @@ export default async function PlanDetailPage({ params, searchParams }: PlanDetai
 function RoadmapStatusMessage({ status }: { status?: string }) {
   const messages: Record<string, string> = {
     generated: "路线图已生成，并写入阶段、任务、资源建议和 AI 调用日志。",
+    regenerated: "AI 路线图已重新生成，旧的阶段、任务和资源建议已替换。",
     "already-exists": "这个计划已经有路线图，暂时不会重复生成。",
     "assessment-required": "请先完成或跳过基础测评，再生成路线图。",
   };

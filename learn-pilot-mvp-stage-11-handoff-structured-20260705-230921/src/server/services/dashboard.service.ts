@@ -42,6 +42,8 @@ export type TaskView = {
   status: string;
   statusLabel: string;
   taskTypeLabel: string;
+  stageLabel?: string | null;
+  stageSequence?: number | null;
   estimatedMinutes: number;
   completionCriteria: string;
   isCore: boolean;
@@ -55,6 +57,7 @@ export type ResourceView = {
   typeLabel: string;
   difficultyLabel: string;
   stageLabel: string | null;
+  stageSequence?: number | null;
   sourceName: string | null;
   estimatedMinutes: number | null;
   recommendationReason: string;
@@ -103,13 +106,11 @@ export type PlanDetailResult =
       tasks: TaskView[];
       resources: ResourceView[];
       notes: NoteView[];
-      latestAssessment:
-        | {
-            status: string;
-            score: number | null;
-            resultLevel: string | null;
-          }
-        | null;
+      latestAssessment: {
+        status: string;
+        score: number | null;
+        resultLevel: string | null;
+      } | null;
     }
   | { status: "not-found" }
   | { status: "unavailable" };
@@ -246,7 +247,11 @@ function toPlanCard(
   };
 }
 
-function toTaskView(task: DailyTask): TaskView {
+type TaskWithStage = DailyTask & {
+  stage?: Pick<RoadmapStage, "sequence" | "title"> | null;
+};
+
+function toTaskView(task: TaskWithStage): TaskView {
   return {
     id: task.id,
     title: task.title,
@@ -254,6 +259,8 @@ function toTaskView(task: DailyTask): TaskView {
     status: task.status,
     statusLabel: taskStatusLabels[task.status],
     taskTypeLabel: taskTypeLabels[task.taskType],
+    stageLabel: task.stage ? `阶段 ${task.stage.sequence}：${task.stage.title}` : null,
+    stageSequence: task.stage?.sequence ?? null,
     estimatedMinutes: task.estimatedMinutes,
     completionCriteria: task.completionCriteria,
     isCore: task.isCore,
@@ -286,6 +293,7 @@ function toResourceView(resource: ResourceWithStage): ResourceView {
     typeLabel: resourceTypeLabels[resource.resourceType],
     difficultyLabel: taskDifficultyLabels[resource.difficulty],
     stageLabel: resource.stage ? `阶段 ${resource.stage.sequence}：${resource.stage.title}` : null,
+    stageSequence: resource.stage?.sequence ?? null,
     sourceName: resource.sourceName,
     estimatedMinutes: resource.estimatedMinutes,
     recommendationReason: resource.recommendationReason,
