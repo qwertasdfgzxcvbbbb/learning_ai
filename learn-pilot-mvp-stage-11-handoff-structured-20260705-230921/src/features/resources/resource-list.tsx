@@ -12,7 +12,10 @@ type ResourceListProps = {
 export function ResourceList({ resources }: ResourceListProps) {
   if (resources.length === 0) {
     return (
-      <EmptyState title="暂无资源建议" description="生成路线图后，这里会展示书籍、课程或网站建议。" />
+      <EmptyState
+        title="暂无资源建议"
+        description="生成路线图后，这里会展示书籍、课程或网站建议。"
+      />
     );
   }
 
@@ -24,7 +27,21 @@ export function ResourceList({ resources }: ResourceListProps) {
           <CardHeader>
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <CardTitle className="line-clamp-2">{resource.title}</CardTitle>
+                {resource.url ? (
+                  <CardTitle>
+                    <a
+                      href={resource.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-start gap-1 text-primary underline-offset-4 hover:underline"
+                    >
+                      <span className="line-clamp-2">{resource.title}</span>
+                      <ExternalLink className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                    </a>
+                  </CardTitle>
+                ) : (
+                  <CardTitle className="line-clamp-2">{resource.title}</CardTitle>
+                )}
                 <p className="mt-1 text-xs text-muted-foreground">
                   {resource.typeLabel}
                   {resource.sourceName ? ` · ${resource.sourceName}` : ""}
@@ -51,7 +68,21 @@ export function ResourceList({ resources }: ResourceListProps) {
                 适用阶段：{resource.stageLabel}
               </p>
             ) : null}
-            <p className="text-sm leading-6 text-muted-foreground">{resource.recommendationReason}</p>
+            {resource.matchedPreferences.length > 0 ? (
+              <div className="flex flex-wrap gap-1">
+                {resource.matchedPreferences.map((preference) => (
+                  <span
+                    key={preference}
+                    className="rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary"
+                  >
+                    匹配偏好：{preference}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+            <p className="text-sm leading-6 text-muted-foreground">
+              {resource.recommendationReason}
+            </p>
             <p className="rounded-md bg-secondary/15 px-3 py-2 text-xs leading-5 text-secondary-foreground">
               请自行核验：{resource.verificationNote}
             </p>

@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { RoadmapList } from "@/features/roadmap/roadmap-list";
-import type { StageView } from "@/server/services/dashboard.service";
+import type { ResourceView, StageView } from "@/server/services/dashboard.service";
 
 const stages: StageView[] = [
   {
@@ -49,6 +49,25 @@ const stages: StageView[] = [
   },
 ];
 
+const resources: ResourceView[] = [
+  {
+    id: "resource-1",
+    title: "Prompt 官方指南",
+    status: "want_to_learn",
+    statusLabel: "想学",
+    typeLabel: "文章",
+    difficultyLabel: "适中",
+    stageLabel: "阶段 1：基础认知",
+    stageSequence: 1,
+    url: "https://example.com/prompt",
+    sourceName: "示例来源",
+    estimatedMinutes: 30,
+    recommendationReason: "匹配你的文章偏好；用于建立概念。",
+    verificationNote: "请核验页面更新时间。",
+    matchedPreferences: ["文章"],
+  },
+];
+
 describe("RoadmapList", () => {
   it("shows a clear empty state", () => {
     render(<RoadmapList stages={[]} />);
@@ -57,7 +76,9 @@ describe("RoadmapList", () => {
   });
 
   it("renders stages and expands details", () => {
-    render(<RoadmapList stages={stages} />);
+    render(
+      <RoadmapList stages={stages} resources={resources} preferredResources={["文章", "案例"]} />,
+    );
 
     expect(screen.getByText("AI 路线图详情")).toBeInTheDocument();
     expect(screen.getByText("1. 基础认知")).toBeInTheDocument();
@@ -66,6 +87,13 @@ describe("RoadmapList", () => {
     expect(screen.getAllByText("排序依据")).toHaveLength(2);
     expect(screen.getAllByText("可核验来源")).toHaveLength(2);
     expect(screen.getByText("OpenAI Evals guide")).toBeInTheDocument();
+    expect(screen.getByText(/文章、案例/)).toBeInTheDocument();
+    expect(screen.getAllByText("本阶段目标的学习资料")).toHaveLength(1);
+    expect(screen.getByRole("link", { name: /Prompt 官方指南/ })).toHaveAttribute(
+      "href",
+      "https://example.com/prompt",
+    );
+    expect(screen.getByText("匹配偏好：文章")).toBeInTheDocument();
     expect(screen.getByText("案例分析、流程拆解、风险识别。")).toBeInTheDocument();
 
     fireEvent.click(screen.getAllByLabelText("收起阶段")[1]);

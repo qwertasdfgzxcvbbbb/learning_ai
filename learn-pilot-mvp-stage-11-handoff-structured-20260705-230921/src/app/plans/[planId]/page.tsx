@@ -155,7 +155,12 @@ export default async function PlanDetailPage({ params, searchParams }: PlanDetai
           </Card>
 
           <ProgressSummary plan={detail.plan} />
-          <RoadmapList stages={detail.stages} tasks={detail.tasks} resources={detail.resources} />
+          <RoadmapList
+            stages={detail.stages}
+            tasks={detail.tasks}
+            resources={detail.resources}
+            preferredResources={detail.plan.preferredResources}
+          />
           <TaskList title="全部任务" tasks={detail.tasks} />
           <ResourceList resources={detail.resources} />
           <NotePanel planId={detail.plan.id} tasks={detail.tasks} notes={detail.notes} />

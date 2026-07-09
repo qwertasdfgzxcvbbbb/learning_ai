@@ -39,12 +39,12 @@ const aiSourceReferences = {
   prompt: [
     {
       title: "OpenAI Text generation guide",
-      url: "https://platform.openai.com/docs/guides/text-generation",
+      url: "https://developers.openai.com/api/docs/guides/text-generation",
       note: "用于核验 LLM 输入输出、提示词和模型能力边界。",
     },
     {
       title: "OpenAI Structured Outputs guide",
-      url: "https://platform.openai.com/docs/guides/structured-outputs",
+      url: "https://developers.openai.com/api/docs/guides/structured-outputs",
       note: "用于核验为什么早期要学习结构化输出和输出约束。",
     },
   ],
@@ -56,14 +56,14 @@ const aiSourceReferences = {
     },
     {
       title: "OpenAI Embeddings guide",
-      url: "https://platform.openai.com/docs/guides/embeddings",
+      url: "https://developers.openai.com/api/docs/guides/embeddings",
       note: "用于核验 Embedding、语义相似度和向量检索的基础作用。",
     },
   ],
   evaluation: [
     {
       title: "OpenAI Evals guide",
-      url: "https://platform.openai.com/docs/guides/evals",
+      url: "https://developers.openai.com/api/docs/guides/evals",
       note: "用于核验为什么 AI 产品需要测试集、评价标准和持续评估。",
     },
     {
@@ -75,7 +75,7 @@ const aiSourceReferences = {
   prd: [
     {
       title: "OpenAI Evals guide",
-      url: "https://platform.openai.com/docs/guides/evals",
+      url: "https://developers.openai.com/api/docs/guides/evals",
       note: "用于把 PRD 的验收标准落到可测试的样例和指标上。",
     },
     {
@@ -95,6 +95,11 @@ export function generateMockRoadmap(input: GenerateRoadmapInput): GenerateRoadma
   const isConservative = level === "zero" || level === "beginner";
   const direction = input.plan.learningDirection;
   const dailyMinutes = input.plan.dailyMinutes;
+  const genericPreferences = [
+    getPreference(input.plan.preferredResources, 0, "文章"),
+    getPreference(input.plan.preferredResources, 1, "案例"),
+    getPreference(input.plan.preferredResources, 2, "项目实践"),
+  ];
 
   const rawOutput: RoadmapOutput = {
     overview: `围绕「${direction}」生成一条 ${input.plan.durationDays} 天的保守学习路线，先建立认知，再进入实践输出。`,
@@ -173,32 +178,38 @@ export function generateMockRoadmap(input: GenerateRoadmapInput): GenerateRoadma
       {
         stageSequence: 1,
         title: `${direction} 入门文章或官方文档`,
-        resourceType: "article",
-        sourceName: "需要自行筛选",
+        resourceType: preferenceToResourceType(genericPreferences[0]),
+        url: `https://zh.wikipedia.org/w/index.php?search=${encodeURIComponent(direction)}`,
+        sourceName: "维基百科检索入口",
         difficulty: "easy",
         estimatedMinutes: 30,
-        recommendationReason: "适合快速建立概念地图。",
-        verificationNote: "请核验作者背景、发布时间和是否与当前学习目标匹配。",
+        recommendationReason: `匹配你的“${genericPreferences[0]}”偏好，适合快速建立概念地图。`,
+        verificationNote: "请从检索结果中选择有引用来源的条目，并核对更新时间。",
+        matchedPreferences: [genericPreferences[0]],
       },
       {
         stageSequence: 2,
         title: `${direction} 真实案例分析`,
-        resourceType: "case_study",
-        sourceName: "需要自行筛选",
+        resourceType: preferenceToResourceType(genericPreferences[1]),
+        url: `https://scholar.google.com/scholar?q=${encodeURIComponent(`${direction} case study`)}`,
+        sourceName: "Google Scholar 检索入口",
         difficulty: "medium",
         estimatedMinutes: 45,
-        recommendationReason: "适合把概念放到具体场景里理解。",
-        verificationNote: "请自行确认案例来源可靠，不要把单一案例当成通用结论。",
+        recommendationReason: `匹配你的“${genericPreferences[1]}”偏好，适合把概念放到具体场景里理解。`,
+        verificationNote: "请自行确认作者、机构和引用信息，不要把单一案例当成通用结论。",
+        matchedPreferences: [genericPreferences[1]],
       },
       {
         stageSequence: 3,
         title: `${direction} 输出模板或检查清单`,
-        resourceType: "tool_guide",
-        sourceName: "需要自行筛选",
+        resourceType: preferenceToResourceType(genericPreferences[2]),
+        url: `https://github.com/search?q=${encodeURIComponent(`${direction} template`)}&type=repositories`,
+        sourceName: "GitHub 项目检索入口",
         difficulty: "medium",
         estimatedMinutes: 30,
-        recommendationReason: "适合辅助完成最终作品草稿。",
-        verificationNote: "请根据自己的目标调整模板，不要直接套用未经核验的建议。",
+        recommendationReason: `匹配你的“${genericPreferences[2]}”偏好，适合辅助完成最终作品草稿。`,
+        verificationNote: "请检查项目更新时间、许可证和维护情况，再根据自己的目标调整模板。",
+        matchedPreferences: [genericPreferences[2]],
       },
     ],
   };
@@ -370,68 +381,156 @@ function generateAiRoadmap(input: GenerateRoadmapInput): GenerateRoadmapResult {
         isCore: true,
       },
     ],
-    resources: [
-      {
-        stageSequence: 1,
-        title: "OpenAI 文本生成与结构化输出文档",
-        resourceType: "official_doc",
-        sourceName: "OpenAI Docs",
-        difficulty: "medium",
-        estimatedMinutes: 45,
-        recommendationReason: "适合理解 Prompt、输出格式和模型能力边界。",
-        verificationNote: "请确认文档版本和你实际使用的模型一致。",
-      },
-      {
-        stageSequence: 1,
-        title: "LLM 产品术语速查表",
-        resourceType: "article",
-        sourceName: "需要自行筛选",
-        difficulty: "easy",
-        estimatedMinutes: 30,
-        recommendationReason: "适合把 Token、上下文窗口、幻觉等术语整理成产品语言。",
-        verificationNote: "请核验作者背景、发布时间和术语是否仍适用于当前主流模型。",
-      },
-      {
-        stageSequence: 2,
-        title: "RAG 架构案例：检索、重排与引用来源",
-        resourceType: "case_study",
-        sourceName: "需要自行筛选",
-        difficulty: "medium",
-        estimatedMinutes: 60,
-        recommendationReason: "适合把知识库问答从技术链路转化为产品流程。",
-        verificationNote: "请确认案例是否说明数据来源、评估方法和失败兜底，而不只是展示效果。",
-      },
-      {
-        stageSequence: 2,
-        title: "Embedding 与向量检索入门资料",
-        resourceType: "tool_guide",
-        sourceName: "需要自行筛选",
-        difficulty: "medium",
-        estimatedMinutes: 45,
-        recommendationReason: "适合理解为什么 RAG 需要先检索再生成。",
-        verificationNote: "请对照至少两个来源，避免把单一工具的实现当成通用原理。",
-      },
-      {
-        stageSequence: 3,
-        title: "AI 产品评估指标与测试集案例",
-        resourceType: "case_study",
-        sourceName: "需要自行筛选",
-        difficulty: "challenging",
-        estimatedMinutes: 60,
-        recommendationReason: "适合学习如何把“回答好不好”转成可验收指标。",
-        verificationNote: "请重点核验指标定义、样本规模和人工评审方式是否清楚。",
-      },
-      {
-        stageSequence: 4,
-        title: "AI App PRD 模板与评审清单",
-        resourceType: "tool_guide",
-        sourceName: "需要自行筛选",
-        difficulty: "medium",
-        estimatedMinutes: 40,
-        recommendationReason: "适合把学习成果整理成可展示、可评审的作品。",
-        verificationNote: "请根据你的目标调整模板，不要直接套用未经核验的建议。",
-      },
-    ],
+    resources: selectResourcesByPreference(
+      [
+        {
+          stageSequence: 1,
+          title: "OpenAI Prompt Engineering 指南",
+          resourceType: "official_doc",
+          url: "https://developers.openai.com/api/docs/guides/prompt-engineering",
+          sourceName: "OpenAI Developers",
+          difficulty: "medium",
+          estimatedMinutes: 45,
+          recommendationReason: "适合理解 Prompt 结构、指令优先级和模型能力边界。",
+          verificationNote: "请确认文档更新时间，并对照你实际使用的模型验证示例。",
+          preferenceTags: ["官方文档", "文章"],
+        },
+        {
+          stageSequence: 1,
+          title: "ChatGPT Prompt Engineering for Developers",
+          resourceType: "video_course",
+          url: "https://www.deeplearning.ai/alpha/short-courses/chatgpt-prompt-engineering-for-developers",
+          sourceName: "DeepLearning.AI × OpenAI",
+          difficulty: "easy",
+          estimatedMinutes: 90,
+          recommendationReason: "用短视频和代码示例建立 Prompt 迭代的直观认识。",
+          verificationNote: "请留意课程使用的模型版本，并把方法迁移到当前模型重新测试。",
+          preferenceTags: ["视频课", "案例"],
+        },
+        {
+          stageSequence: 1,
+          title: "Structured Outputs 实践案例",
+          resourceType: "exercise",
+          url: "https://developers.openai.com/cookbook/examples/structured_outputs_intro",
+          sourceName: "OpenAI Cookbook",
+          difficulty: "medium",
+          estimatedMinutes: 60,
+          recommendationReason: "通过可运行示例理解结构化输出及其产品验收价值。",
+          verificationNote: "请实际修改 Schema 和输入进行测试，不要只阅读示例结果。",
+          preferenceTags: ["项目实践", "案例"],
+        },
+        {
+          stageSequence: 2,
+          title: "OpenAI Retrieval 指南",
+          resourceType: "official_doc",
+          url: "https://developers.openai.com/api/docs/guides/retrieval",
+          sourceName: "OpenAI Developers",
+          difficulty: "medium",
+          estimatedMinutes: 50,
+          recommendationReason: "适合建立向量存储、语义检索和检索参数的完整概念。",
+          verificationNote: "请把产品流程概念与具体 API 参数分开记录，避免绑定单一实现。",
+          preferenceTags: ["官方文档", "文章"],
+        },
+        {
+          stageSequence: 2,
+          title: "用 File Search 完成 PDF RAG",
+          resourceType: "exercise",
+          url: "https://developers.openai.com/cookbook/examples/file_search_responses",
+          sourceName: "OpenAI Cookbook",
+          difficulty: "medium",
+          estimatedMinutes: 75,
+          recommendationReason: "用完整案例观察上传、检索、回答和引用来源的链路。",
+          verificationNote: "请重点记录失败场景、引用质量和资料更新策略，而不只看成功结果。",
+          preferenceTags: ["项目实践", "案例"],
+        },
+        {
+          stageSequence: 2,
+          title: "RAG 原始论文",
+          resourceType: "paper",
+          url: "https://arxiv.org/abs/2005.11401",
+          sourceName: "arXiv",
+          difficulty: "challenging",
+          estimatedMinutes: 90,
+          recommendationReason: "用于核验 RAG 的原始问题定义、方法和实验依据。",
+          verificationNote:
+            "请结合更新的工程资料阅读，不要把 2020 年论文实现直接当作当前最佳实践。",
+          preferenceTags: ["文章", "书籍"],
+        },
+        {
+          stageSequence: 3,
+          title: "OpenAI Evals 指南",
+          resourceType: "official_doc",
+          url: "https://developers.openai.com/api/docs/guides/evals",
+          sourceName: "OpenAI Developers",
+          difficulty: "medium",
+          estimatedMinutes: 55,
+          recommendationReason: "适合把模糊的“回答质量”拆成测试集、评分规则和持续评估。",
+          verificationNote: "请根据你的产品场景重新定义样本和评分标准，不要照搬示例指标。",
+          preferenceTags: ["官方文档", "文章"],
+        },
+        {
+          stageSequence: 3,
+          title: "OpenAI Evals 入门实践",
+          resourceType: "exercise",
+          url: "https://developers.openai.com/cookbook/examples/evaluation/getting_started_with_openai_evals",
+          sourceName: "OpenAI Cookbook",
+          difficulty: "challenging",
+          estimatedMinutes: 75,
+          recommendationReason: "通过可运行案例练习数据集、评分器和评估结果分析。",
+          verificationNote: "请加入你自己的边界样例，并检查评分器是否与人工判断一致。",
+          preferenceTags: ["项目实践", "案例"],
+        },
+        {
+          stageSequence: 3,
+          title: "NIST AI 风险管理框架",
+          resourceType: "article",
+          url: "https://www.nist.gov/itl/ai-risk-management-framework",
+          sourceName: "NIST",
+          difficulty: "challenging",
+          estimatedMinutes: 60,
+          recommendationReason: "补充可靠性、安全、治理和持续风险管理维度。",
+          verificationNote: "请确认当前框架版本，并只选择与你的产品场景相关的风险项。",
+          preferenceTags: ["文章", "案例"],
+        },
+        {
+          stageSequence: 4,
+          title: "Atlassian 产品需求文档模板",
+          resourceType: "tool_guide",
+          url: "https://www.atlassian.com/software/confluence/templates/product-requirements",
+          sourceName: "Atlassian",
+          difficulty: "easy",
+          estimatedMinutes: 35,
+          recommendationReason: "提供可直接改写的需求背景、目标、假设和验收结构。",
+          verificationNote: "请加入 AI 能力边界、数据来源、评估集和失败兜底，不要原样套用模板。",
+          preferenceTags: ["项目实践", "案例"],
+        },
+        {
+          stageSequence: 4,
+          title: "NIST AI RMF Playbook",
+          resourceType: "tool_guide",
+          url: "https://www.nist.gov/itl/ai-risk-management-framework/nist-ai-rmf-playbook",
+          sourceName: "NIST",
+          difficulty: "challenging",
+          estimatedMinutes: 60,
+          recommendationReason: "用于把风险识别、度量和处置动作补进 AI App PRD。",
+          verificationNote: "请按产品风险等级选用条目，框架不是固定验收清单。",
+          preferenceTags: ["文章", "官方文档"],
+        },
+        {
+          stageSequence: 4,
+          title: "用 Evals 样例完善 PRD 验收标准",
+          resourceType: "case_study",
+          url: "https://developers.openai.com/cookbook/examples/evaluation/getting_started_with_openai_evals",
+          sourceName: "OpenAI Cookbook",
+          difficulty: "medium",
+          estimatedMinutes: 50,
+          recommendationReason: "把 PRD 里的验收描述转换成输入、期望输出和判分规则。",
+          verificationNote: "请使用你自己的用户任务和失败样例验证验收标准。",
+          preferenceTags: ["项目实践", "案例"],
+        },
+      ],
+      input.plan.preferredResources,
+    ),
   };
 
   const parsed = roadmapOutputSchema.parse(rawOutput);
@@ -440,6 +539,65 @@ function generateAiRoadmap(input: GenerateRoadmapInput): GenerateRoadmapResult {
     promptVersion: ROADMAP_PROMPT_VERSION,
     output: parsed,
   };
+}
+
+type RoadmapResource = RoadmapOutput["resources"][number];
+type ResourceCandidate = Omit<RoadmapResource, "matchedPreferences"> & {
+  preferenceTags: string[];
+};
+
+function selectResourcesByPreference(
+  candidates: ResourceCandidate[],
+  preferredResources: string[],
+): RoadmapResource[] {
+  const preferenceSet = new Set(preferredResources);
+  const stageSequences = [...new Set(candidates.map((candidate) => candidate.stageSequence))].sort(
+    (left, right) => left - right,
+  );
+
+  return stageSequences.flatMap((stageSequence) =>
+    candidates
+      .filter((candidate) => candidate.stageSequence === stageSequence)
+      .map((candidate, originalIndex) => ({
+        candidate,
+        originalIndex,
+        matches: candidate.preferenceTags.filter((tag) => preferenceSet.has(tag)),
+      }))
+      .sort(
+        (left, right) =>
+          right.matches.length - left.matches.length || left.originalIndex - right.originalIndex,
+      )
+      .slice(0, 2)
+      .map(({ candidate }) => {
+        const { preferenceTags, ...resource } = candidate;
+        const matches = preferenceTags.filter((tag) => preferenceSet.has(tag));
+        const preferenceReason =
+          matches.length > 0 ? `匹配你的“${matches.join("、")}”偏好` : "作为这个阶段的核心参考资料";
+
+        return {
+          ...resource,
+          recommendationReason: `${preferenceReason}；${resource.recommendationReason}`,
+          matchedPreferences: matches,
+        };
+      }),
+  );
+}
+
+function getPreference(preferences: string[], index: number, fallback: string) {
+  return preferences[index] ?? preferences[0] ?? fallback;
+}
+
+function preferenceToResourceType(preference: string): RoadmapResource["resourceType"] {
+  const resourceTypeByPreference: Record<string, RoadmapResource["resourceType"]> = {
+    文章: "article",
+    书籍: "book",
+    视频课: "video_course",
+    案例: "case_study",
+    项目实践: "exercise",
+    官方文档: "official_doc",
+  };
+
+  return resourceTypeByPreference[preference] ?? "article";
 }
 
 function isAiPlan(plan: GenerateRoadmapInput["plan"]) {

@@ -108,6 +108,7 @@ export async function generateRoadmapForPlan(
         estimatedMinutes: resource.estimatedMinutes,
         recommendationReason: resource.recommendationReason,
         verificationNote: resource.verificationNote,
+        matchedPreferences: resource.matchedPreferences,
         requiresVerification: true,
         aiGenerated: true,
       })),

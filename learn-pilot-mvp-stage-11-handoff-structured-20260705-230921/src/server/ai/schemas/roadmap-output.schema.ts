@@ -54,19 +54,34 @@ export const roadmapResourceOutputSchema = z.object({
     "tool_guide",
     "website",
   ]),
-  url: z.string().url().optional(),
+  url: z.string().url(),
   sourceName: z.string().optional(),
   difficulty: z.enum(["easy", "medium", "challenging"]),
   estimatedMinutes: z.number().int().min(5).max(600).optional(),
   recommendationReason: z.string().min(6),
   verificationNote: z.string().min(6),
+  matchedPreferences: z.array(z.string().min(1)).max(6),
 });
 
-export const roadmapOutputSchema = z.object({
-  overview: z.string().min(10),
-  stages: z.array(roadmapStageOutputSchema).min(2).max(4),
-  tasks: z.array(roadmapTaskOutputSchema).min(2).max(12),
-  resources: z.array(roadmapResourceOutputSchema).min(2).max(6),
-});
+export const roadmapOutputSchema = z
+  .object({
+    overview: z.string().min(10),
+    stages: z.array(roadmapStageOutputSchema).min(2).max(4),
+    tasks: z.array(roadmapTaskOutputSchema).min(2).max(12),
+    resources: z.array(roadmapResourceOutputSchema).min(2).max(12),
+  })
+  .superRefine((output, context) => {
+    const resourceStages = new Set(output.resources.map((resource) => resource.stageSequence));
+
+    for (const stage of output.stages) {
+      if (!resourceStages.has(stage.sequence)) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["resources"],
+          message: `阶段 ${stage.sequence} 缺少学习资料。`,
+        });
+      }
+    }
+  });
 
 export type RoadmapOutput = z.infer<typeof roadmapOutputSchema>;

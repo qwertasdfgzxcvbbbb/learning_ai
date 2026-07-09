@@ -24,7 +24,7 @@ describe("generateMockRoadmap", () => {
       },
     });
 
-    expect(result.promptVersion).toBe("mock-roadmap-v1");
+    expect(result.promptVersion).toBe("mock-roadmap-v2");
     expect(result.output.stages).toHaveLength(4);
     expect(result.output.stages.map((stage) => stage.title)).toEqual([
       "LLM 与 Prompt 基础判断",
@@ -39,6 +39,17 @@ describe("generateMockRoadmap", () => {
     ).toBe(true);
     expect(result.output.tasks.length).toBeGreaterThanOrEqual(2);
     expect(result.output.resources.length).toBeGreaterThanOrEqual(2);
+    expect(
+      result.output.stages.every((stage) =>
+        result.output.resources.some((resource) => resource.stageSequence === stage.sequence),
+      ),
+    ).toBe(true);
+    expect(result.output.resources.every((resource) => resource.url.startsWith("https://"))).toBe(
+      true,
+    );
+    expect(
+      result.output.resources.every((resource) => resource.matchedPreferences.length > 0),
+    ).toBe(true);
   });
 
   it("keeps resources verifiable instead of promising reliability", () => {
@@ -50,5 +61,21 @@ describe("generateMockRoadmap", () => {
     expect(
       result.output.resources.every((resource) => resource.verificationNote.includes("请")),
     ).toBe(true);
+  });
+
+  it("changes resource priority when the user's preference changes", () => {
+    const videoResult = generateMockRoadmap({
+      plan: { ...plan, preferredResources: ["视频课"] },
+      assessment: null,
+    });
+    const practiceResult = generateMockRoadmap({
+      plan: { ...plan, preferredResources: ["项目实践"] },
+      assessment: null,
+    });
+
+    expect(videoResult.output.resources[0]?.title).toBe(
+      "ChatGPT Prompt Engineering for Developers",
+    );
+    expect(practiceResult.output.resources[0]?.title).toBe("Structured Outputs 实践案例");
   });
 });

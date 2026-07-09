@@ -19,10 +19,12 @@ const resources: ResourceView[] = [
     typeLabel: "官方文档",
     difficultyLabel: "适中",
     stageLabel: "阶段 1：基础认知",
+    url: "https://example.com/docs",
     sourceName: "官方文档",
     estimatedMinutes: 45,
     recommendationReason: "适合先建立稳定概念，再进入案例练习。",
     verificationNote: "请以官方更新时间和版本说明为准。",
+    matchedPreferences: ["官方文档"],
   },
 ];
 
@@ -46,6 +48,11 @@ describe("ResourceList", () => {
     expect(screen.getByText("适中")).toBeInTheDocument();
     expect(screen.getByText("45 分钟")).toBeInTheDocument();
     expect(screen.getByText("适用阶段：阶段 1：基础认知")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /官方文档入门章节/ })).toHaveAttribute(
+      "href",
+      "https://example.com/docs",
+    );
+    expect(screen.getByText("匹配偏好：官方文档")).toBeInTheDocument();
     expect(screen.getByText("请自行核验：请以官方更新时间和版本说明为准。")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "已学" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "不适合" })).toBeInTheDocument();

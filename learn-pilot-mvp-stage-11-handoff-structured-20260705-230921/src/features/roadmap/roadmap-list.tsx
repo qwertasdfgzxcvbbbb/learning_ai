@@ -24,9 +24,15 @@ type RoadmapListProps = {
   stages: StageView[];
   tasks?: TaskView[];
   resources?: ResourceView[];
+  preferredResources?: string[];
 };
 
-export function RoadmapList({ stages, tasks = [], resources = [] }: RoadmapListProps) {
+export function RoadmapList({
+  stages,
+  tasks = [],
+  resources = [],
+  preferredResources = [],
+}: RoadmapListProps) {
   const [openStageIds, setOpenStageIds] = useState(() => new Set(stages.map((stage) => stage.id)));
 
   if (stages.length === 0) {
@@ -69,7 +75,11 @@ export function RoadmapList({ stages, tasks = [], resources = [] }: RoadmapListP
       <div className="rounded-lg border bg-card p-3 text-xs leading-5 text-muted-foreground">
         <div className="flex items-start gap-2">
           <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-          <span>路线图来自 mock AI。它是学习建议，不是绝对承诺；资源和结论都需要你自行核验。</span>
+          <span>
+            推荐器会优先匹配你的资源偏好
+            {preferredResources.length > 0 ? `：${preferredResources.join("、")}` : ""}
+            。每个阶段目标都有可点击的学习资料，资源和结论仍需要你自行核验。
+          </span>
         </div>
       </div>
 
@@ -127,12 +137,12 @@ export function RoadmapList({ stages, tasks = [], resources = [] }: RoadmapListP
                   <InfoBlock label="内容提纲" value={stage.contentOutline} />
                   <InfoBlock label="预期产出" value={stage.expectedOutcome} />
                   <InfoBlock label="验收方式" value={stage.acceptanceCriteria} />
+                  <StageResourceBlock resources={stageResources} />
                   {stage.sequenceRationale ? (
                     <InfoBlock label="排序依据" value={stage.sequenceRationale} />
                   ) : null}
                   <SourceReferenceBlock references={stage.sourceReferences} />
                   <StageTaskBlock tasks={stageTasks} />
-                  <StageResourceBlock resources={stageResources} />
                   <div className="rounded-md bg-muted px-3 py-2 text-xs leading-5">
                     来源：{stage.aiGenerated ? "mock AI 生成" : "用户创建"}
                     {stage.sourcePromptVersion ? ` · ${stage.sourcePromptVersion}` : ""}
@@ -226,17 +236,45 @@ function StageResourceBlock({ resources }: { resources: ResourceView[] }) {
 
   return (
     <div className="rounded-md bg-muted px-3 py-2">
-      <div className="text-xs font-medium text-foreground">推荐资料</div>
+      <div className="text-xs font-medium text-foreground">本阶段目标的学习资料</div>
       <div className="mt-2 space-y-2">
-        {resources.slice(0, 2).map((resource) => (
+        {resources.map((resource) => (
           <div
             key={resource.id}
             className="space-y-1 border-t border-border/60 pt-2 first:border-t-0 first:pt-0"
           >
-            <div className="text-xs font-medium text-foreground">{resource.title}</div>
+            {resource.url ? (
+              <a
+                href={resource.url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-xs font-medium text-primary underline-offset-4 hover:underline"
+              >
+                {resource.title}
+                <ExternalLink className="h-3 w-3" aria-hidden="true" />
+              </a>
+            ) : (
+              <div className="text-xs font-medium text-foreground">{resource.title}</div>
+            )}
             <p className="text-xs leading-5 text-muted-foreground">
               {resource.typeLabel} · {resource.difficultyLabel}
               {resource.estimatedMinutes ? ` · ${resource.estimatedMinutes} 分钟` : ""}
+              {resource.sourceName ? ` · ${resource.sourceName}` : ""}
+            </p>
+            {resource.matchedPreferences.length > 0 ? (
+              <div className="flex flex-wrap gap-1">
+                {resource.matchedPreferences.map((preference) => (
+                  <span
+                    key={preference}
+                    className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[11px] font-medium text-primary"
+                  >
+                    匹配偏好：{preference}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+            <p className="text-xs leading-5 text-muted-foreground">
+              {resource.recommendationReason}
             </p>
           </div>
         ))}

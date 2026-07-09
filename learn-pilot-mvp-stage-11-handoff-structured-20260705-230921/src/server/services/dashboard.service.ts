@@ -33,6 +33,7 @@ export type PlanCardView = {
   streakDays: number;
   canCheckIn: boolean;
   stageCount: number;
+  preferredResources?: string[];
 };
 
 export type TaskView = {
@@ -58,10 +59,12 @@ export type ResourceView = {
   difficultyLabel: string;
   stageLabel: string | null;
   stageSequence?: number | null;
+  url: string | null;
   sourceName: string | null;
   estimatedMinutes: number | null;
   recommendationReason: string;
   verificationNote: string;
+  matchedPreferences: string[];
 };
 
 export type RoadmapSourceReferenceView = {
@@ -252,6 +255,7 @@ function toPlanCard(
     streakDays: overview.streakDays,
     canCheckIn: overview.canCheckIn,
     stageCount: plan.roadmapStages.length,
+    preferredResources: plan.preferredResources,
   };
 }
 
@@ -302,10 +306,12 @@ function toResourceView(resource: ResourceWithStage): ResourceView {
     difficultyLabel: taskDifficultyLabels[resource.difficulty],
     stageLabel: resource.stage ? `阶段 ${resource.stage.sequence}：${resource.stage.title}` : null,
     stageSequence: resource.stage?.sequence ?? null,
+    url: resource.url,
     sourceName: resource.sourceName,
     estimatedMinutes: resource.estimatedMinutes,
     recommendationReason: resource.recommendationReason,
     verificationNote: resource.verificationNote,
+    matchedPreferences: resource.matchedPreferences,
   };
 }
 

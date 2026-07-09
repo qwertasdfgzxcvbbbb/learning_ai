@@ -275,6 +275,7 @@ model ResourceRecommendation {
   estimatedMinutes     Int?
   recommendationReason String
   verificationNote     String
+  matchedPreferences   String[]       @default([])
   requiresVerification Boolean        @default(true)
   aiGenerated          Boolean        @default(false)
   createdAt            DateTime       @default(now())
