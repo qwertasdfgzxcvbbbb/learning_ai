@@ -39,6 +39,7 @@ export async function createNoteAction(
   }
 
   revalidatePath(`/plans/${result.planId}`);
+  revalidatePath(`/plans/${result.planId}/review`);
 
   return {
     status: "success",

@@ -212,3 +212,7 @@
 - AI 调用必须放在 `src/server/ai` 后面。
 - 在用户明确要求真实 API 集成前，继续使用 mock AI 行为。
 - 架构或文件职责发生变化时，必须同步更新本文档。
+
+## 阶段 12 补强说明
+
+`docs/stage-12-audit.md` 说明仓库根目录与应用目录的关系。任务和笔记 actions 会刷新计划复盘路径。复盘保存 action 会将服务异常转为可恢复表单提示。`tests/unit/review-actions.test.ts` 验证这些行为。

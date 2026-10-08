@@ -48,7 +48,8 @@ export function WeeklyReviewSummary({ stats }: WeeklyReviewSummaryProps) {
           <Metric label="跳过任务" value={`${stats.skippedTaskCount}`} />
         </div>
         <p className="rounded-md bg-muted px-3 py-2 text-xs leading-5 text-muted-foreground">
-          本周共有 {stats.progressLogCount} 条进度日志用于复盘参考。跳过任务不计入完成率分母。
+          本周安排的任务按当前状态计算完成率，跳过任务不计入分母，延期任务算未完成。
+          延期和跳过次数包含本周日志中的任务，按任务去重。共有 {stats.progressLogCount} 条进度日志。
         </p>
       </CardContent>
     </Card>
@@ -112,16 +113,23 @@ export function ReviewHistory({ reviews }: ReviewHistoryProps) {
                 <Metric label="跳过" value={`${review.skippedTaskCount}`} />
               </div>
               {review.satisfactionScore ? (
-                <p className="text-sm text-muted-foreground">满意度：{review.satisfactionScore}/5</p>
+                <p className="text-sm text-muted-foreground">
+                  满意度：{review.satisfactionScore}/5
+                </p>
               ) : null}
               {review.blockers ? <p className="text-sm leading-6">{review.blockers}</p> : null}
               {review.nextGoal ? (
-                <p className="text-sm leading-6 text-muted-foreground">下周目标：{review.nextGoal}</p>
+                <p className="text-sm leading-6 text-muted-foreground">
+                  下周目标：{review.nextGoal}
+                </p>
               ) : null}
             </div>
           ))
         ) : (
-          <EmptyState title="还没有复盘记录" description="保存本周复盘后，会在这里按时间倒序显示。" />
+          <EmptyState
+            title="还没有复盘记录"
+            description="保存本周复盘后，会在这里按时间倒序显示。"
+          />
         )}
       </CardContent>
     </Card>
@@ -139,7 +147,8 @@ export function AiAdjustmentPanel({ planId, adjustments, canGenerate }: AiAdjust
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-sm leading-6 text-muted-foreground">
-          AI 建议会先保存为待确认状态。只有点击确认应用后，才会修改计划说明和每日学习时长，并生成新的计划版本。
+          AI
+          建议会先保存为待确认状态。只有点击确认应用后，才会修改计划说明和每日学习时长，并生成新的计划版本。
         </p>
         <form action={generateReviewAdjustmentAction}>
           <input type="hidden" name="planId" value={planId} />
@@ -156,7 +165,10 @@ export function AiAdjustmentPanel({ planId, adjustments, canGenerate }: AiAdjust
         {adjustments.length > 0 ? (
           <div className="space-y-3">
             {adjustments.map((adjustment) => (
-              <div key={adjustment.id} className="space-y-3 rounded-md border bg-background px-3 py-3">
+              <div
+                key={adjustment.id}
+                className="space-y-3 rounded-md border bg-background px-3 py-3"
+              >
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="space-y-1">
                     <p className="text-sm font-medium">{adjustment.title}</p>
@@ -178,7 +190,10 @@ export function AiAdjustmentPanel({ planId, adjustments, canGenerate }: AiAdjust
                 {adjustment.nextReviewFocus.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {adjustment.nextReviewFocus.map((focus) => (
-                      <span key={focus} className="rounded-md border px-2 py-1 text-xs text-muted-foreground">
+                      <span
+                        key={focus}
+                        className="rounded-md border px-2 py-1 text-xs text-muted-foreground"
+                      >
                         {focus}
                       </span>
                     ))}
@@ -198,7 +213,10 @@ export function AiAdjustmentPanel({ planId, adjustments, canGenerate }: AiAdjust
             ))}
           </div>
         ) : (
-          <EmptyState title="暂无调整建议" description="生成后会先显示为待确认，不会自动修改计划。" />
+          <EmptyState
+            title="暂无调整建议"
+            description="生成后会先显示为待确认，不会自动修改计划。"
+          />
         )}
       </CardContent>
     </Card>
