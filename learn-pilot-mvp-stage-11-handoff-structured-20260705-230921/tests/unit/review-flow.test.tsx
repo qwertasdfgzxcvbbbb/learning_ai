@@ -209,3 +209,38 @@ describe("review UI", () => {
     expect(screen.getByRole("button", { name: "保存复盘" })).toBeInTheDocument();
   });
 });
+
+describe("weekly review boundaries", () => {
+  it("uses Beijing Monday inclusive and next Monday exclusive across a year boundary", () => {
+    const stats = calculateWeeklyReviewStats({
+      today: new Date("2026-01-04T15:59:59Z"),
+      tasks: [
+        { id: "before", status: "done", scheduledFor: new Date("2025-12-28T15:59:59Z") },
+        { id: "start", status: "done", scheduledFor: new Date("2025-12-28T16:00:00Z") },
+        { id: "end", status: "todo", scheduledFor: new Date("2026-01-04T16:00:00Z") },
+      ],
+      progressLogs: [
+        { taskId: "start", type: "task_delayed", loggedFor: new Date("2025-12-29T01:00:00Z") },
+        { taskId: "start", type: "task_delayed", loggedFor: new Date("2025-12-30T01:00:00Z") },
+        { taskId: "end", type: "task_skipped", loggedFor: new Date("2026-01-04T16:00:00Z") },
+      ],
+    });
+    expect(stats.periodStart.toISOString()).toBe("2025-12-28T16:00:00.000Z");
+    expect(stats.periodEnd.toISOString()).toBe("2026-01-04T16:00:00.000Z");
+    expect(stats.completionRatePercent).toBe(100);
+    expect(stats.totalTasks).toBe(1);
+    expect(stats.delayedTaskCount).toBe(1);
+    expect(stats.skippedTaskCount).toBe(0);
+  });
+
+  it("returns zero rather than NaN when all weekly tasks are skipped", () => {
+    const stats = calculateWeeklyReviewStats({
+      today: new Date("2026-07-08T04:00:00Z"),
+      tasks: [{ id: "skip", status: "skipped", scheduledFor: new Date("2026-07-08T04:00:00Z") }],
+      progressLogs: [],
+    });
+    expect(stats.totalTasks).toBe(0);
+    expect(stats.completionRate).toBe(0);
+    expect(stats.skippedTaskCount).toBe(1);
+  });
+});

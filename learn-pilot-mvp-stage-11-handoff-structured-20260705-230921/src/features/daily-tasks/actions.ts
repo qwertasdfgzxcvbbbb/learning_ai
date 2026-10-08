@@ -23,6 +23,7 @@ export async function updateTaskStatusAction(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/plans");
   revalidatePath(`/plans/${result.planId}`);
+  revalidatePath(`/plans/${result.planId}/review`);
 }
 
 function isTaskStatus(status: string): status is DailyTaskStatus {

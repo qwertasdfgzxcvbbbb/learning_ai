@@ -1,81 +1,20 @@
-# 交接说明
+# 当前交接入口
 
-这个项目是移动端优先的 AI 学习计划 MVP。当前已完成到阶段 11：简单笔记。
+当前应用位于 `learn-pilot-mvp-stage-11-handoff-structured-20260705-230921/`。目录名称是历史名称，不代表当前开发进度。
 
-## 当前进度
+请从该目录开始阅读以下文件，然后查看相关代码和测试。
 
-- 阶段 1：项目骨架与基础规范，已完成。
-- 阶段 2：数据模型与本地 PostgreSQL，已完成。
-- 阶段 3：基础页面与移动端导航，已完成。
-- 阶段 4：学习目标创建，已完成。
-- 阶段 5：基础测评，已完成。
-- 阶段 6：mock AI 路线图生成，已完成。
-- 阶段 7：路线图展示，已完成。
-- 阶段 8：每日任务基础闭环，已完成。
-- 阶段 9：进度反馈，已完成。
-- 阶段 10：资源建议，已完成。
-- 阶段 11：简单笔记，已完成。
+- `memory-bank/implementation-plan.md`
+- `memory-bank/progress.md`
+- `memory-bank/architecture.md`
+- `docs/stage-12-audit.md`
 
-下一阶段是阶段 12：基础复盘。请先阅读 `memory-bank/implementation-plan.md`、`memory-bank/progress.md`、`memory-bank/architecture.md` 和当前要修改模块附近的代码与测试。
+最新源码已经包含阶段 12 基础周复盘与阶段 13 mock AI 调整建议。ZIP 是较早的阶段 11 快照，缺少当前目录中的复盘功能和文档，不应覆盖当前源码。后续计划是阶段 14 端到端测试。本次工作补强阶段 12 的错误反馈、刷新与边界验证。
 
-## 重要规则
+继续使用演示用户和 mock AI。不要配置真实 OpenAI 模型或密钥。页面只负责路由、布局和组件组合，数据库访问经过 repository/service，AI 调用位于 `src/server/ai`。调整建议只有用户确认后才可生效。笔记保留原文，资源保留核验提示。
 
-- 页面文件只负责路由、布局和组件组合。
-- 数据库访问必须经过 repository 或 service。
-- AI 调用必须放在 `src/server/ai` 后面。
-- 当前仍使用演示用户模式，不做真实登录。
-- 当前仍使用 mock AI，不接真实 OpenAI API。
-- 资源建议必须保留核验提示。
-- 笔记只保存用户原文，不做 AI 摘要、改写、图片、附件或富文本。
+## 本地运行和检查
 
-## 本地运行
+在应用目录运行 `npm ci` 和 `npm run prisma:generate`。复制 `.env.example` 为本地 `.env` 并配置 PostgreSQL，保持 `OPENAI_MODEL=mock` 且 API key 为空。现有 Windows 便携启动脚本为 `scripts/start-postgres.cmd` 和 `scripts/start-dev.cmd`。使用其他系统时请自行启动 PostgreSQL，再运行 `npm run db:deploy` 和 `npm run dev`。`db:seed` 会重置演示数据，只能在独立演示数据库使用。
 
-先启动本地 PostgreSQL：
-
-```text
-scripts\start-postgres.cmd
-```
-
-再启动 Next.js：
-
-```text
-scripts\start-dev.cmd
-```
-
-访问：
-
-```text
-http://127.0.0.1:3000/
-```
-
-## 已通过验证
-
-最近一次阶段 11 验证：
-
-```text
-npm run typecheck
-npm run lint
-npm run test:run
-npm run build
-```
-
-测试结果：
-
-```text
-9 个测试文件通过
-42 个测试用例通过
-```
-
-## 交接包说明
-
-交接包不包含：
-
-- `.env`
-- `.git`
-- `.next`
-- `.tools`
-- `node_modules`
-- 本机 Node 安装包
-- TypeScript 构建缓存
-
-这些内容不是源码交接所必需，且可能包含本机路径、体积过大或敏感信息。
+检查命令为 `npm run typecheck`、`npm run lint`、`npm run test:run`、`npm run build`。数据库和移动端 E2E 的运行结果需要单独确认。

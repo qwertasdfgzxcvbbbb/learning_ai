@@ -67,6 +67,7 @@ export function ReviewForm({ planId }: ReviewFormProps) {
 
       {state.message ? (
         <p
+          role={state.status === "error" ? "alert" : "status"}
           className={
             state.status === "success"
               ? "rounded-md bg-primary/10 px-3 py-2 text-xs leading-5 text-primary"

@@ -23,12 +23,20 @@ export async function createReviewAction(
   const satisfactionScore = String(formData.get("satisfactionScore") ?? "");
   const nextGoal = String(formData.get("nextGoal") ?? "");
 
-  const result = await createWeeklyReview({
-    planId,
-    blockers,
-    satisfactionScore,
-    nextGoal,
-  });
+  let result;
+  try {
+    result = await createWeeklyReview({
+      planId,
+      blockers,
+      satisfactionScore,
+      nextGoal,
+    });
+  } catch {
+    return {
+      status: "error",
+      message: "复盘保存未完成，请稍后重试。输入内容仍保留在表单中。",
+    };
+  }
 
   if (result.status === "invalid") {
     return {
